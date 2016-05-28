@@ -2,14 +2,14 @@
 
 namespace Irazasyed\JwtAuthGuard;
 
+use Tymon\JWTAuth\JWTAuth;
 use BadMethodCallException;
+use Illuminate\Http\Request;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\JWT;
+use Illuminate\Contracts\Auth\UserProvider;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class JwtAuthGuard implements Guard
 {
@@ -43,7 +43,7 @@ class JwtAuthGuard implements Guard
      * @param \Illuminate\Contracts\Auth\UserProvider $provider
      * @param \Illuminate\Http\Request                $request
      */
-    public function __construct(JWT $jwt, UserProvider $provider, Request $request)
+    public function __construct(JWTAuth $jwt, UserProvider $provider, Request $request)
     {
         $this->jwt = $jwt;
         $this->provider = $provider;
@@ -71,7 +71,7 @@ class JwtAuthGuard implements Guard
     /**
      * Log a user into the application without sessions or cookies.
      *
-     * @param array $credentials
+     * @param  array $credentials
      *
      * @return bool
      */
@@ -89,7 +89,7 @@ class JwtAuthGuard implements Guard
     /**
      * Validate a user's credentials.
      *
-     * @param array $credentials
+     * @param  array $credentials
      *
      * @return bool
      */
@@ -120,11 +120,11 @@ class JwtAuthGuard implements Guard
     /**
      * Create a token for a user.
      *
-     * @param JWTSubject $user
+     * @param  UserInterface $user
      *
      * @return string
      */
-    public function login(JWTSubject $user)
+    public function login($user)
     {
         $this->setUser($user);
 
@@ -134,7 +134,7 @@ class JwtAuthGuard implements Guard
     /**
      * Log the given user ID into the application without sessions or cookies.
      *
-     * @param mixed $id
+     * @param  mixed $id
      *
      * @return bool
      */
@@ -167,7 +167,7 @@ class JwtAuthGuard implements Guard
     /**
      * Generate new token by ID.
      *
-     * @param mixed $id
+     * @param  mixed $id
      *
      * @return string|null
      */
@@ -176,6 +176,8 @@ class JwtAuthGuard implements Guard
         if (!is_null($user = $this->provider->retrieveById($id))) {
             return $this->jwt->fromUser($user);
         }
+
+        return null;
     }
 
     /**
@@ -191,9 +193,9 @@ class JwtAuthGuard implements Guard
     /**
      * Invalidate current token (add it to the blacklist).
      *
-     * @param bool $forceForever
+     * @param  boolean $forceForever
      *
-     * @return bool
+     * @return boolean
      */
     public function invalidate($forceForever = false)
     {
@@ -213,7 +215,7 @@ class JwtAuthGuard implements Guard
     /**
      * Set the token.
      *
-     * @param Token|string $token
+     * @param  Token|string $token
      *
      * @return JwtGuard
      */
@@ -237,8 +239,8 @@ class JwtAuthGuard implements Guard
     /**
      * Determine if the user matches the credentials.
      *
-     * @param mixed $user
-     * @param array $credentials
+     * @param  mixed $user
+     * @param  array $credentials
      *
      * @return bool
      */
@@ -248,7 +250,7 @@ class JwtAuthGuard implements Guard
     }
 
     /**
-     * Ensure that a token is available in the request.
+     * Ensure that a token is available in the request
      *
      * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
      *
@@ -296,7 +298,7 @@ class JwtAuthGuard implements Guard
     /**
      * Set the user provider used by the guard.
      *
-     * @param \Illuminate\Contracts\Auth\UserProvider $provider
+     * @param  \Illuminate\Contracts\Auth\UserProvider $provider
      *
      * @return $this
      */
@@ -310,7 +312,7 @@ class JwtAuthGuard implements Guard
     /**
      * Set the current request instance.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request $request
      *
      * @return $this
      */
@@ -324,12 +326,11 @@ class JwtAuthGuard implements Guard
     /**
      * Magically call the JWT instance.
      *
-     * @param string $method
-     * @param array  $parameters
-     *
-     * @throws BadMethodCallException
+     * @param  string $method
+     * @param  array  $parameters
      *
      * @return mixed
+     * @throws BadMethodCallException
      */
     public function __call($method, $parameters)
     {
